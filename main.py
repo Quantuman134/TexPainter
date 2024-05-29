@@ -1,8 +1,10 @@
 import argparse
+import torch
 import utils
 from utils import device
 from stable_diffusion_depth import StableDiffusionDepth
 from texture import Texture
+from function import tex_paint
 
 def main(args):
     port=7890
@@ -18,16 +20,56 @@ def main(args):
 
     # diffusion configuration
     num_inference_steps = args.num_inference_steps
+    end_step = args.end_step
+    guidance_scale = args.guidance_scale
 
     sd = StableDiffusionDepth(device=device, num_inference_steps=num_inference_steps)
     print("[INFO] Stable Diffusion Loaded")
 
     text_embeddings = sd.text_encoding(text_prompt)
+    DM_params = DMParams(text_embeddings, guidance_scale, end_step)
 
+
+    # rendering configuration
+    # mesh
+    mesh_data = utils.mesh_import(mesh_dir=mesh_dir, device=device)
+
+    if mesh_data is None:
+        print("[INFO] Mesh data load failed")
+    print("[INFO] Mesh Loaded")
+
+    # texture
     latent_tex_size = args.latent_tex_size
     rgb_tex_size = args.rgb_tex_size
     tex_latent = Texture(size=(latent_tex_size, latent_tex_size), device=device, is_latent=True)
     tex_rgb = Texture(size=(rgb_tex_size, rgb_tex_size), device=device, is_latent=False)
+
+    # cameras
+    camera_num = args.camera_num
+    fov = args.fov
+    dist = args.dist
+    dists = torch.ones((camera_num, 1), dtype=torch.float32, device=device) * dist
+    elevs = torch.tensor([args.elev] * camera_num , dtype=torch.float32, device=device).reshape(camera_num, 1)
+    azims = torch.tensor([i*(360.0/camera_num) for i in range(camera_num)], dtype=torch.float32, device=device).reshape(camera_num, 1)
+
+    camera_params = CameraParams(camera_num, dists, elevs, azims, fov)
+
+    # texture painting
+    tex_paint()
+
+class CameraParams():
+    def __init__(self, camera_num, dists, elevs, azims, fov) -> None:
+        self.camera_num = camera_num
+        self.dists = dists
+        self.elevs = elevs
+        self.azims = azims
+        self.fov = fov
+
+class DMParams():
+    def __init__(self, text_embeddings, guidance_scale, end_step) -> None:
+        self.text_embeddings = text_embeddings
+        self.guidance_scale = guidance_scale
+        self.end_step = end_step
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

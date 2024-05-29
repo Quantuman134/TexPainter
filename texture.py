@@ -6,6 +6,7 @@ class Texture(nn.Module):
     # sample mode: 'bilinear', 'nearest'
         super().__init__()
         self.device = device
+        self.size = size
         self.height = size[0]
         self.width = size[1]
         self.is_latent = is_latent
@@ -18,3 +19,9 @@ class Texture(nn.Module):
             self.texture = torch.randn((self.height, self.width, 4), dtype=torch.float32, device=self.device, requires_grad=True) * sig + mean
         else:
             self.texture = torch.randn((self.height, self.width, 3), dtype=torch.float32, device=self.device, requires_grad=True) * sig + mean
+
+    def set_indentical_value(self, value=0):
+        if self.is_latent:
+            self.texture = torch.ones((self.height, self.width, 4), dtype=torch.float32, device=self.device, requires_grad=True) * value
+        else:
+            self.texture = torch.ones((self.height, self.width, 3), dtype=torch.float32, device=self.device, requires_grad=True) * value
