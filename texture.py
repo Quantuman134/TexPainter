@@ -25,3 +25,44 @@ class Texture(nn.Module):
             self.texture = torch.ones((self.height, self.width, 4), dtype=torch.float32, device=self.device, requires_grad=True) * value
         else:
             self.texture = torch.ones((self.height, self.width, 3), dtype=torch.float32, device=self.device, requires_grad=True) * value
+
+    def set_image(self, img_tensor):
+        #img_tensor size: [B, C, H, W], color value [0, 1]
+        B, C, H, W = img_tensor.size()
+        img_tensor = img_tensor * 2 - 1.0
+        self.height = H
+        self.width = W
+        img_tensor = img_tensor.to(self.device)
+        self.texture = img_tensor.squeeze().permute(1, 2, 0)
+
+    def forward(self, uvs):
+        colors = self.texture_sample(uvs)
+        return colors
+    
+    def texture_sample(self, uvs):
+        uvs = (uvs + 1)/2
+        uvs[:, 0] *= (self.width - 1)
+        uvs[:, 1] *= (self.height - 1)
+
+        us_0 = uvs[:, 0].floor().type(torch.int32)
+        us_1 = uvs[:, 0].ceil().type(torch.int32)
+        vs_0 = uvs[:, 1].floor().type(torch.int32)
+        vs_1 = uvs[:, 1].ceil().type(torch.int32)
+
+        a = (uvs[:, 0] - us_0).reshape(-1, 1)
+        b = (uvs[:, 1] - vs_0).reshape(-1, 1)
+
+        a[a<0.5] = 0
+        a[a>=0.5] = 1
+        b[b<0.5] = 0
+        b[b>=0.5] = 1
+
+        us_0[us_0 >= self.width] = self.width - 1
+        us_1[us_1 >= self.width] = self.width - 1
+        vs_0[vs_0 >= self.height] = self.height - 1
+        vs_1[vs_1 >= self.height] = self.height - 1
+
+        colors = self.texture[us_0, vs_0, :] * (1-a) * (1-b) + self.texture[us_1, vs_0, :] * a * (1-b) \
+            + self.texture[us_0, vs_1, :] * (1-a) * b + self.texture[us_1, vs_1, :] * a * b
+
+        return colors

@@ -2,6 +2,7 @@ from diff_renderer import DiffRenderer
 from utils import device
 from texture import Texture
 from tqdm.auto import tqdm
+import torch
 
 def tex_paint(
         tex_latent,
@@ -42,3 +43,20 @@ def tex_paint(
             elev = elevs[n]
             azim = azims[n]
 
+            # depth map
+            depth_map = depth_map_rendering()
+
+
+def depth_map_rendering(renderer:DiffRenderer, mesh_data, tex_latent, elev, azim, dist, fov):
+    '''
+    depth map: [1, 3, 64, 64], (-1, 1)
+    '''
+    renderer.rasterization_setting(image_size=64)
+    renderer.camera_setting(dist=dist, elev=elev, azim=azim, fov=fov)
+    background_map = torch.zeros((1, 3, 64, 64), dtype=torch.float32, device=tex_latent.device)
+
+    image = renderer.rendering(mesh_data=mesh_data, diff_tex=tex_latent, 
+                                shading_method='depth', extra_output=False, 
+                                background_map=background_map)
+    depth_map = (image[:, :, :, 0] * 2 - 1.0).unsqueeze(-1).permute(0, 3, 1, 2)
+    return depth_map
