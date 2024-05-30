@@ -3,6 +3,7 @@ import torch
 import random
 import numpy as np
 from pytorch3d import io
+import matplotlib.pyplot as plt
 
 def net_config(port=7890):
     proxy = f'http://127.0.0.1:{port}'
@@ -46,3 +47,9 @@ def mesh_import(mesh_dir, device='cpu'):
     mesh_data = {'mesh_obj': mesh_obj,'verts': verts, 'faces': faces, 'aux': aux}
 
     return mesh_data
+
+def save_img_tensor(img_tensor, save_dir):
+    # size of tensor (N, C, H, W), N is restricted to 1, the range of color value is [0, 1.0]
+    img_tensor = torch.clamp(img_tensor, 0.0, 1.0)
+    img = img_tensor.squeeze().permute(1, 2, 0).detach().cpu().numpy()
+    plt.imsave(save_dir, img)

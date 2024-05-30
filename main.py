@@ -4,7 +4,7 @@ import utils
 from utils import device
 from stable_diffusion_depth import StableDiffusionDepth
 from texture import Texture
-from function import tex_paint
+from function import tex_paint, tex_export
 
 def main(args):
     port=7890
@@ -29,6 +29,9 @@ def main(args):
     text_embeddings = sd.text_encoding(text_prompt)
     DM_params = DMParams(text_embeddings, guidance_scale, end_step)
 
+    # optimization
+    epochs = args.opt_eps
+    learning_rate = args.opt_lr
 
     # rendering configuration
     # mesh
@@ -55,7 +58,9 @@ def main(args):
     camera_params = CameraParams(camera_num, dists, elevs, azims, fov)
 
     # texture painting
-    tex_paint()
+    tex_paint(mesh_data, tex_latent, tex_rgb, DM_params, sd, camera_params, epochs, learning_rate)
+
+    tex_export(mesh_data, tex_rgb, camera_params, device=device, save_dir=save_dir)
 
 class CameraParams():
     def __init__(self, camera_num, dists, elevs, azims, fov) -> None:

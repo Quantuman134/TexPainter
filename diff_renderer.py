@@ -94,7 +94,7 @@ def test():
 
     background_map = torch.ones((1, 3, 512, 512), dtype=torch.float32, device=utils.device) * 0.5
     background_map[:, 2, :, :] = 0.0
-    image_tensor = renderer.rendering(mesh_data=mesh_data, diff_tex=diff_tex, shading_method='phong', background_map=background_map).images
+    image_tensor = renderer.rendering(mesh_data=mesh_data, diff_tex=diff_tex, shading_method='Ndot', background_map=background_map).images
     image_array = image_tensor[0, :, :, 0:3].cpu().detach().numpy()
     image_array = np.clip(image_array, 0, 1)
     plt.imshow(image_array)

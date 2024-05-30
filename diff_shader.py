@@ -8,6 +8,7 @@ from pytorch3d.renderer.mesh.rasterizer import Fragments
 from pytorch3d.structures.meshes import Meshes
 from pytorch3d.ops import interpolate_face_attributes
 import torch
+import torch.nn.functional as F
 
 class Shader_Output():
     def __init__(self, images, pixel_uvs=None) -> None:
@@ -55,6 +56,8 @@ class DiffShader(shader.ShaderBase):
             )
         elif self.shading_method == 'depth':
             colors = self.depth_shading(fragments=fragments)
+        elif self.shading_method == 'NdotV':
+            colors = self.NdotV_shading(meshes=meshes, fragments=fragments, cameras=cameras)
         else:
             colors = texels
 
@@ -98,8 +101,45 @@ class DiffShader(shader.ShaderBase):
         return (texels, pixel_uvs)
     
     def depth_shading(self, fragments):
-        return self.z_coordinate_color(fragments=fragments)
+        #r represent the indice i, and g represent the indice j
+        N, H, W, K = fragments.pix_to_face.size()
+        z = fragments.zbuf
+        z_max = z.max().item()
+        z_min = z[z>-1].min().item()
+
+        # inverse depth
+        z[z>-1] = (z_max - z[z>-1]) / (z_max - z_min)
+
+        colors = torch.zeros((N, H, W, K, 3), device=self.device)
+        colors[:, :, :, :, 0] = z
+        colors[:, :, :, :, 1] = z
+        colors[:, :, :, :, 2] = z
+
+        return colors
     
+    def NdotV_shading(self, meshes, fragments, cameras):
+        if self.diff_tex.is_latent:
+            C = 4
+        else:
+            C = 3
+        # norms cal
+        verts = meshes.verts_packed()  # (V, 3)
+        faces = meshes.faces_packed()  # (F, 3)
+        faces_verts = verts[faces]
+        pixel_coords_in_camera = interpolate_face_attributes(
+            fragments.pix_to_face, fragments.bary_coords, faces_verts
+        )
+
+        face_normals = meshes.faces_normals_packed() #(F, 3)
+        norms = face_normals[fragments.pix_to_face, :]
+
+        # view cal
+        camera_position = cameras.get_camera_center().squeeze()
+        views = F.normalize((camera_position - pixel_coords_in_camera), dim=4)
+        colors = torch.clamp(torch.sum(norms * views, dim=4).unsqueeze(3), 0.00001, 1.0)
+        colors = torch.cat([colors] * C, dim=-1)
+
+        return colors
 
     def softmax_rgb_blend_custom(
         self,
