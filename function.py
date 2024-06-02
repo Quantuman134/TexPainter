@@ -174,7 +174,7 @@ def views_merge(tex_latent:Texture, tex_rgb:Texture, tex_Q_latent:Texture, img_l
         if epochs == 0:
             rgb_gt = rgb_gt.reshape(512, 512, 3).unsqueeze(0).permute(0, 3, 1, 2)
             # test
-            utils.save_img_tensor(rgb_gt, f'Results/img_rgb_pred{timestep}_{i}.png')
+            # utils.save_img_tensor(rgb_gt, f'Results/img_rgb_pred{timestep}_{i}.png')
             #######
             img_latent = diffusion_model.img_encoding(rgb_gt)
         ##############
@@ -208,16 +208,18 @@ def views_merge(tex_latent:Texture, tex_rgb:Texture, tex_Q_latent:Texture, img_l
         tex_latent.texel_set(pixel_uvs_latent, img_latent)
         tex_Q_latent.texel_set(pixel_uvs_latent, img_Q_latent)
 
-        # texel add noise
-        if time_reverse:
-            latents_pred = tex_latent.texture.unsqueeze(0).permute(0, 3, 1, 2)
+    # texel add noise
+    if time_reverse:
+        latents_pred = tex_latent.texture.unsqueeze(0).permute(0, 3, 1, 2)
 
-            latents = diffusion_model.custom_ddim_step(latents_pred, timestep, latents_noisy)
-            latents = latents.permute(0, 2, 3, 1).squeeze(0)
-            tex_latent.texture = latents
+        latents = diffusion_model.custom_ddim_step(latents_pred, timestep, latents_noisy)
+        latents = latents.permute(0, 2, 3, 1).squeeze(0)
+        tex_latent.texture = latents
 
     end_t = time.time()
     #print(f'fusion process time cost: {end_t - start_t} s.')
+    tex_img = ((tex_rgb.texture+1.0)/2.0).unsqueeze(0).permute(0, 3, 1, 2)
+    #utils.save_img_tensor(tex_img, f'Results/tex_result_{timestep}.png')
 
 def Q_weight_mapping(Q, T=0, p=6):
     # Q threshold
@@ -243,20 +245,21 @@ def tex_export(mesh_data, tex_rgb, camera_params, device=device, save_dir=None):
     azims = camera_params.azims
     fov = camera_params.fov
 
+    tex_rgb.texture = tex_rgb.texture * 2.0 - 1.0
     gt_img_list = []
     for n in range(camera_num):
         dist = dists[n]
         elev = elevs[n]
         azim = azims[n]
         img_tensor = tex_rgb_rendering(renderer, mesh_data, tex_rgb, elev, azim, dist, fov, shading_method='no_light').images[:, :, :, 0:3].permute(0, 3, 1, 2)
-        utils.save_img_tensor(img_tensor, save_dir + f'/rgb_fusion_gt_{n}.png')
+        #utils.save_img_tensor(img_tensor, save_dir + f'/rgb_fusion_gt_{n}.png')
         gt_img_list.append(img_tensor.detach())
 
     gt_imgs = torch.cat(gt_img_list, dim=0)
     mlp_tex = NeuralTextureField(width=32, depth=2, input_dim=2, device=device, expected_tex_size=tex_rgb.size[0])
 
     # learning configuration
-    epochs = 500
+    epochs = 2000
     learning_rate = 0.1
     optimizer = torch.optim.AdamW(mlp_tex.parameters(), lr=learning_rate)
     log_update_period = 500

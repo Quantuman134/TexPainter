@@ -5,7 +5,6 @@ import tinycudann as tcnn
 
 class Texture(nn.Module):
     def __init__(self, size=(512, 512), is_latent=False, device='cpu') -> None:
-    # sample mode: 'bilinear', 'nearest'
         super().__init__()
         self.device = device
         self.size = size
