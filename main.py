@@ -7,9 +7,6 @@ from texture import Texture
 from function import tex_paint, tex_export
 
 def main(args):
-    port=7890
-    utils.net_config(port)
-    
     seed = args.seed
     utils.seed_everything(seed)
 
