@@ -186,3 +186,17 @@ class NeuralTextureField(nn.Module):
         colors = x
         colors = torch.clamp(colors, -0.95, 0.95)
         return colors
+    
+    def render_img(self, height=512, width=512):
+        coo_tensor = torch.zeros((height, width, 2), dtype=torch.float32, device=self.device)
+        j = torch.arange(start=0, end=height, device=self.device).unsqueeze(0).transpose(0, 1).repeat(1, width)
+        i = torch.arange(start=0, end=height, device=self.device).unsqueeze(0).repeat(height, 1)
+        x = (j * 2 + 1.0) / height - 1.0
+        y = (i * 2 + 1.0) / width - 1.0
+        coo_tensor[:, :, 0] = x
+        coo_tensor[:, :, 1] = y
+        img_tensor = coo_tensor.reshape(-1, 2) # [H*W, 2] # color latent [-1, 1]
+        img_tensor = (self(img_tensor) + 1) / 2 # color rgb [0, 1]
+        
+        img_tensor = img_tensor.reshape(1, height, width, self.output_dim).permute(0, 3, 1, 2).contiguous()
+        return img_tensor

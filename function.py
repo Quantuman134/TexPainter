@@ -218,7 +218,7 @@ def views_merge(tex_latent:Texture, tex_rgb:Texture, tex_Q_latent:Texture, img_l
 
     end_t = time.time()
     #print(f'fusion process time cost: {end_t - start_t} s.')
-    tex_img = ((tex_rgb.texture+1.0)/2.0).unsqueeze(0).permute(0, 3, 1, 2)
+    #tex_img = ((tex_rgb.texture+1.0)/2.0).unsqueeze(0).permute(0, 3, 1, 2)
     #utils.save_img_tensor(tex_img, f'Results/tex_result_{timestep}.png')
 
 def Q_weight_mapping(Q, T=0, p=6):
@@ -296,5 +296,5 @@ def tex_export(mesh_data, tex_rgb, camera_params, device=device, save_dir=None):
             start_t = end_t
 
     if save_dir is not None:
-        tex_img = ((tex_rgb.texture+1.0)/2.0).unsqueeze(0).permute(0, 3, 1, 2)
+        tex_img = mlp_tex.render_img(tex_rgb.height, tex_rgb.width)
         utils.save_img_tensor(tex_img, save_dir + '/tex_result.png')
