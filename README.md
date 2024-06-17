@@ -10,6 +10,9 @@ For additional details, please see the TexPainter [paper](Docs/Paper.pdf)
 ## Install
 This code is tested on Ubuntu20.04 LTS with Python 3.8 and PyTorch 2.0.1 CUDA 11.8 installed. To run our method, you should at least have a NVIDIA GPU with 24 GB RAM. We test our code on a RTX 3090. Please follow below steps to configure the environment of code.
 ```
+# create a conda environment with Python 3.8
+conda create -n TexPainter python=3.8
+
 # install PyTorch
 conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=11.8 -c pytorch -c nvidia
 ```
@@ -21,6 +24,10 @@ conda install -c bottler nvidiacub
 
 # install PyTorch3D
 conda install pytorch3d -c pytorch3d
+```
+Finally, install other packages
+```
+pip install -r requirements.txt
 ```
 
 ## Usage
