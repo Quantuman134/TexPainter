@@ -1,4 +1,5 @@
 matplotlib
 tqdm
-diffusers["torch"] transformers
+diffusers[torch] 
+transformers
 git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
