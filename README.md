@@ -1,6 +1,7 @@
 # TexPainter: Generative Mesh Texturing with Multi-view Consistency
 ![Teaser](Docs/Teaser.png)
 
+## 
 ⚠️ 2024.7.3: The code of current version appears problems, and these problems probably decrease the generation quality and cause artifacts. We are checking the source of problem.
 
 ## Introduction
