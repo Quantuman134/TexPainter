@@ -7,6 +7,8 @@ Please check our project page [here](https://quantuman134.github.io/)
 
 For additional details, please see the TexPainter [paper](Docs/Paper.pdf)
 
+⚠️ 2024.7.3: The code of current version appears problems, and these problems probably decrease the generation quality and cause artifacts. We are checking the source of problem.
+
 ## Install
 This code is tested on Ubuntu20.04 LTS with Python 3.8 and PyTorch 2.0.1 CUDA 11.8 installed. To run our method, you should at least have a NVIDIA GPU with 24 GB RAM. We test our code on a RTX 3090. Please follow below steps to configure the environment of code.
 ```
