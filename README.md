@@ -59,4 +59,4 @@ python main.py --mesh_dir <your-mesh> --save_dir <output-dir> --text_prompt <you
   --opt_lr <learning-rate-in-optimization=0.1>
 ```
 
-If you set the ```--opt_eps 0```. The optimization process is passed and same with the direct VAE encoding method. A concrete illustration can be found in our paper.
+⚠️ If you set the ```--opt_eps 0```. The optimization process is passed and same with the direct VAE encoding method. We recommend you try this configuration, as it will shorten the generation time to within 5min, while the results will not decrease significantly in most samples. A concrete illustration can be found in our paper.
