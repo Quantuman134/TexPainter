@@ -266,7 +266,7 @@ def tex_export(mesh_data, tex_rgb, camera_params, device=device, save_dir=None):
     start_t = time.time()
     total_loss = 0
 
-    mlp_tex.sampling_disturb = True
+    mlp_tex.sampling_disturb = False
 
     for epoch in range(epochs):
         optimizer.zero_grad()

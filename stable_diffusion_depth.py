@@ -84,10 +84,10 @@ class StableDiffusionDepth():
 
         # according to predicted noise, update the latents
         if prediction_output:
-            latents_model = self.scheduler.step(noise_pred, t, latents, eta=eta, tau=tau)
+            latents_model = self.scheduler.step(noise_pred, t, latents, eta=eta)
             return latents_model
         else:
-            latents = self.scheduler.step(noise_pred, t, latents, eta=eta, tau=tau).prev_sample 
+            latents = self.scheduler.step(noise_pred, t, latents, eta=eta).prev_sample 
             return latents
         
     def custom_ddim_step(self, latents_pred, timestep, latents_noisy, eta=1.0, tau=1.0):
