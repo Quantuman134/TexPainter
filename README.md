@@ -3,6 +3,7 @@
 
 ## 
 ⚠️ 2024.11.4: The problems have fixed, and the quality of results is improved aligning with that in the paper. Welcome to try!
+
 ⚠️ 2024.7.3: The code of current version appears problems, and these problems probably decrease the generation quality and cause artifacts. We are checking the source of problems.
 
 ## Introduction
