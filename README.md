@@ -40,13 +40,13 @@ pip install -r requirements.txt
 We provide examples to show the texture painting process. To try the TexPainter, you can input the following command lines:
 
 ```
-python main.py --mesh_dir 'Assets/Nascar.obj' --save_dir 'Results' --text_prompt 'The next gen of nascar'
+python main.py --mesh_dir 'Assets/Nascar.obj' --save_dir 'Results' --text_prompt 'The next gen of nascar' --opt_eps 0
 ```
 
 and
 
 ```
-python main.py --mesh_dir 'Assets/China_Vase.obj' --save_dir 'Results' --text_prompt 'Chinese blue and white porcelain'
+python main.py --mesh_dir 'Assets/China_Vase.obj' --save_dir 'Results' --text_prompt 'Chinese blue and white porcelain' --opt_eps 0
 ```
 
 You also can generate texture from your own mesh models and text prompts with these arguments:
